@@ -1,0 +1,84 @@
+java code :
+import java.sql.*;
+import java.util.Scanner;
+
+public class JDBC {
+    public static void main(String[] args) {
+        String url = "jdbc:mysql://localhost:3306/jdbc_db";
+        String user = "root";
+        String password = "your_password";
+        Scanner sc = new Scanner(System.in);
+
+        try (Connection con = DriverManager.getConnection(url, user, password)) {
+            con.setAutoCommit(false);
+            System.out.println("Connected to MySQL!");
+
+            while(true){
+                System.out.println("\n1. View Employees\n2. Exit\nEnter choice: ");
+                int ch = sc.nextInt(); sc.nextLine();
+
+                switch(ch){
+                    case 1:
+                        try(Statement stmt = con.createStatement();
+                            ResultSet rs = stmt.executeQuery("SELECT * FROM Employee")) {
+                            System.out.println("EmpID\tName\tSalary");
+                            while(rs.next()){
+                                System.out.println(rs.getInt("EmpID")+"\t"+rs.getString("Name")+"\t"+rs.getDouble("Salary"));
+                            }
+                        }
+                        break;
+                    case 2:
+                        System.out.println("Exiting"); return;
+                    default:
+                        System.out.println("Invalid choice");
+                }
+            }
+
+        } catch(SQLException e){ e.printStackTrace(); }
+    }
+}
+mysql code :
+-- Create database
+CREATE DATABASE IF NOT EXISTS jdbc_db;
+USE jdbc_db;
+
+-- Employee Table
+CREATE TABLE IF NOT EXISTS Employee (
+    EmpID INT PRIMARY KEY,
+    Name VARCHAR(50),
+    Salary DOUBLE
+);
+
+INSERT INTO Employee (EmpID, Name, Salary) VALUES
+(101, 'Alice', 50000),
+(102, 'Bob', 60000),
+(103, 'Charlie', 55000)
+ON DUPLICATE KEY UPDATE Name=VALUES(Name), Salary=VALUES(Salary);
+
+-- Product Table
+CREATE TABLE IF NOT EXISTS Product (
+    ProductID INT PRIMARY KEY,
+    ProductName VARCHAR(50),
+    Price DOUBLE,
+    Quantity INT
+);
+
+INSERT INTO Product (ProductID, ProductName, Price, Quantity) VALUES
+(1, 'Laptop', 55000, 10),
+(2, 'Mouse', 500, 50),
+(3, 'Keyboard', 1200, 30)
+ON DUPLICATE KEY UPDATE ProductName=VALUES(ProductName), Price=VALUES(Price), Quantity=VALUES(Quantity);
+
+-- Student Table
+CREATE TABLE IF NOT EXISTS Student (
+    StudentID INT PRIMARY KEY,
+    Name VARCHAR(50),
+    Department VARCHAR(50),
+    Marks DOUBLE
+);
+
+INSERT INTO Student (StudentID, Name, Department, Marks) VALUES
+(1, 'Rohit', 'CSE', 85.5),
+(2, 'Anita', 'IT', 92.0),
+(3, 'Karan', 'ECE', 78.0)
+ON DUPLICATE KEY UPDATE Name=VALUES(Name), Department=VALUES(Department), Marks=VALUES(Marks);
